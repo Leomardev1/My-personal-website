@@ -1,0 +1,178 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Portfolio pessoal de Leomar, desenvolvedor focado em Python, Django e interfaces web claras."
+    >
+    <title>Leomar | Developer</title>
+    <link rel="stylesheet" href="{% static 'blog/styles.css' %}">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="{% url 'portfolio' %}" aria-label="Página inicial">Leomar</a>
+
+        <nav class="site-nav" aria-label="Navegação principal">
+          <a href="#about">Sobre</a>
+          <a href="#projects">Projetos</a>
+          <a href="#skills">Skills</a>
+          <a href="#learning">Aprendizado</a>
+          <a href="#contact">Contato</a>
+          <a href="{% url 'blog:post_lista' %}">Blog</a>
+        </nav>
+
+        <a class="header-button" href="#contact">Contato</a>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="eyebrow">Python • Django • Web</div>
+          <h1 id="hero-title">Leomar</h1>
+          <p class="role">Developer focused on Python, Django, and thoughtful digital products.</p>
+          <p class="intro">
+            I build small, useful things with attention to clarity, structure, and user experience.
+            My work is guided by clean code, practical thinking, and the habit of learning by shipping.
+          </p>
+
+          <div class="cta-row">
+            <a class="primary-button" href="#projects">Ver projetos</a>
+            <a class="secondary-button" href="mailto:leomardev1@gmail.com">leomardev1@gmail.com</a>
+          </div>
+
+          <ul class="social-list" aria-label="Links sociais">
+            <li><a href="https://github.com/Leomardev1" target="_blank" rel="noreferrer">GitHub</a></li>
+            <li><a href="https://www.instagram.com/leomardev1/" target="_blank" rel="noreferrer">Instagram</a></li>
+            <li><a href="mailto:leomardev1@gmail.com">Email</a></li>
+          </ul>
+        </section>
+
+        <section id="about" class="content-section about-section" aria-labelledby="about-title">
+          <div class="section-heading">
+            <p class="section-kicker">Sobre</p>
+            <h2 id="about-title">Desenvolvedor com foco em construir coisas simples e bem feitas.</h2>
+          </div>
+
+          <div class="about-grid">
+            <p>
+              Sou um desenvolvedor que gosta de resolver problemas com código limpo, interfaces claras e uma boa dose de atenção aos detalhes.
+              Meu caminho passa por Python, Django, HTML, CSS e JavaScript, com preferência por projetos que misturam lógica, usabilidade e identidade pessoal.
+            </p>
+            <div class="about-aside">
+              <p>Atualmente interessado em:</p>
+              <ul>
+                <li>Python e Django</li>
+                <li>Interfaces web</li>
+                <li>Projetos pessoais</li>
+                <li>Aprendizado contínuo</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="projects" class="content-section" aria-labelledby="projects-title">
+          <div class="section-heading">
+            <p class="section-kicker">Projetos</p>
+            <h2 id="projects-title">Trabalhos em andamento e ideias em construção.</h2>
+          </div>
+
+          <div class="project-grid">
+            {% for project in project_list %}
+              <article class="project-card" aria-label="{{ project.name }}">
+                <p class="project-index">0{{ forloop.counter }}</p>
+                <h3>{{ project.name }}</h3>
+                <p class="project-stack">{{ project.stack }}</p>
+                <p>{{ project.description }}</p>
+              </article>
+            {% empty %}
+              <article class="project-card">
+                <p class="project-index">01</p>
+                <h3>Portfolio pessoal</h3>
+                <p class="project-stack">Django • Python • HTML</p>
+                <p>Espaço para apresentar projetos, pensamento e evolução como desenvolvedor.</p>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section id="skills" class="content-section" aria-labelledby="skills-title">
+          <div class="section-heading">
+            <p class="section-kicker">Skills</p>
+            <h2 id="skills-title">Ferramentas e áreas em que estou trabalhando.</h2>
+          </div>
+
+          <div class="skills-grid" aria-label="Lista de habilidades">
+            <div>
+              <h3>Languages</h3>
+              <ul>
+                <li>Python</li>
+                <li>HTML</li>
+                <li>CSS</li>
+                <li>JavaScript</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Frameworks & tools</h3>
+              <ul>
+                <li>Django</li>
+                <li>Git</li>
+                <li>GitHub</li>
+                <li>SQLite</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Focus</h3>
+              <ul>
+                <li>Product thinking</li>
+                <li>Frontend clarity</li>
+                <li>Backend structure</li>
+                <li>Continuous learning</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="learning" class="content-section" aria-labelledby="learning-title">
+          <div class="section-heading">
+            <p class="section-kicker">Aprendizado</p>
+            <h2 id="learning-title">Aprendendo e melhorando com cada projeto.</h2>
+          </div>
+
+          <div class="timeline" aria-label="Linha do tempo do aprendizado">
+            <article>
+              <span>Agora</span>
+              <h3>Projetos pessoais</h3>
+              <p>Construindo experiências digitais com foco em clareza, qualidade e intenção.</p>
+            </article>
+            <article>
+              <span>Foco</span>
+              <h3>Python e Django</h3>
+              <p>Fortalecendo lógica de backend, organização de código e experiência de uso.</p>
+            </article>
+            <article>
+              <span>Próximo</span>
+              <h3>Refino contínuo</h3>
+              <p>Melhorando interface, estrutura e feedback visual em projetos pequenos e úteis.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="contact" class="content-section contact-section" aria-labelledby="contact-title">
+          <div class="section-heading narrow-heading">
+            <p class="section-kicker">Contato</p>
+            <h2 id="contact-title">Se quiser conversar sobre um projeto, uma ideia ou uma conversa simples, me chame.</h2>
+          </div>
+
+          <div class="contact-list" aria-label="Contatos">
+            <a href="mailto:leomardev1@gmail.com">leomardev1@gmail.com</a>
+            <a href="https://github.com/Leomardev1" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="https://www.instagram.com/leomardev1/" target="_blank" rel="noreferrer">Instagram</a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

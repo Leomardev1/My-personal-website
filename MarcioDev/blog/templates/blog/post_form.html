@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <title>Criar post</title>
+</head>
+<body>
+    <h1>Criar post</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ formulario.as_p }}
+        <button type="submit">Salvar post</button>
+    </form>
+    <p><a href="{% url 'blog:post_lista' %}">Cancelar</a></p>
+</body>
+</html>
