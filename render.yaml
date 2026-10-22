@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: marciodev
+    runtime: python
+    rootDir: MarcioDev
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
+    startCommand: gunicorn MarcioDev.wsgi:application
