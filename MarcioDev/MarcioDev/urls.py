@@ -27,13 +27,9 @@ def google_verification(request):
     )
 
 urlpatterns = [
-    path("google8226808ef9ac6c65.html", google_verification),
-    # ... suas outras rotas
-]
-
-urlpatterns = [
     path('', blog_views.portfolio, name='portfolio'),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('posts/', include('blog.urls')),
+    path("google8226808ef9ac6c65.html", google_verification),
 ]
