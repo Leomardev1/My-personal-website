@@ -16,8 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-
 from blog import views as blog_views
+
+from django.http import HttpResponse
+
+def google_verification(request):
+    return HttpResponse(
+        "google-site-verification: google8226808ef9ac6c65.html",
+        content_type="text/html",
+    )
+
+urlpatterns = [
+    path("google8226808ef9ac6c65.html", google_verification),
+    # ... suas outras rotas
+]
 
 urlpatterns = [
     path('', blog_views.portfolio, name='portfolio'),
