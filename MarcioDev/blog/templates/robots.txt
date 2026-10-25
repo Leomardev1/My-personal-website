@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin/
+
+Sitemap: https://my-personal-website-3-5ggz.onrender.com/sitemap.xml
