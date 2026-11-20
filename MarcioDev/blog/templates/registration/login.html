@@ -1,22 +1,24 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-    <meta charset="utf-8">
-    <title>Login</title>
-</head>
-<body>
-    <h1>Login</h1>
+{% extends "blog/base.html" %}
 
-    {% if form.errors %}
-        <p>Usuário ou senha inválidos.</p>
-    {% endif %}
+{% block shell_class %} blog-shell{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Entrar</button>
-    </form>
+{% block content %}
+      <main class="form-layout">
+        <section class="form-card form-card-narrow">
+          <p class="section-kicker">Área restrita</p>
+          <h1>Login</h1>
 
-    <p><a href="{% url 'blog:post_lista' %}">Voltar para os posts</a></p>
-</body>
-</html>
+          <form method="post" class="stack-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for campo in form %}
+              <div class="form-field">{{ campo.as_field_group }}</div>
+            {% endfor %}
+            <div class="form-actions">
+              <button type="submit" class="primary-button">Entrar</button>
+              <a href="{% url 'blog:post_lista' %}" class="text-button">Voltar para os posts</a>
+            </div>
+          </form>
+        </section>
+      </main>
+{% endblock %}

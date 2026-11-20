@@ -1,37 +1,15 @@
-{% load static %}
-<!doctype html>
-<html lang="pt-br">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ post.titulo }} | Leomar</title>
-    <meta name="description" content="{{ post.resumo|default:post.conteudo|truncatewords:20 }}">
-    <link rel="stylesheet" href="{% static 'blog/styles.css' %}">
-  </head>
-  <body>
-    <div class="page-shell blog-shell">
-      <header class="site-header">
-        <a class="brand" href="{% url 'portfolio' %}" aria-label="Página inicial">Leomar</a>
+{% extends "blog/base.html" %}
 
-        <nav class="site-nav" aria-label="Navegação principal">
-          <a href="{% url 'portfolio' %}#about">Sobre</a>
-          <a href="{% url 'portfolio' %}#projects">Projetos</a>
-          <a href="{% url 'portfolio' %}#skills">Skills</a>
-          <a href="{% url 'portfolio' %}#learning">Aprendizado</a>
-          <a href="{% url 'portfolio' %}#contact">Contato</a>
-          <a href="{% url 'blog:post_lista' %}">Blog</a>
-        </nav>
+{% block shell_class %} blog-shell{% endblock %}
 
-        <a class="header-button" href="{% url 'portfolio' %}#contact">Contato</a>
-      </header>
-
+{% block content %}
       <main class="post-layout">
         <article class="article-card">
           <p class="section-kicker">Artigo</p>
           <h1>{{ post.titulo }}</h1>
 
           <div class="article-meta">
-            <span>{{ post.criado_em|date:"d/m/Y H:i" }}</span>
+            <time datetime="{{ post.criado_em|date:'c' }}">{{ post.criado_em|date:"d/m/Y H:i" }}</time>
             {% if post.tags.all %}
               <span>
                 {% for tag in post.tags.all %}
@@ -45,24 +23,30 @@
         </article>
 
         <aside class="comment-panel">
-          <h2>Comentarios</h2>
+          <h2>Comentários</h2>
           {% for comentario in comentarios %}
             <article class="comment-item">
               <strong>{{ comentario.nome }}</strong>
-              <p>{{ comentario.conteudo|linebreaks }}</p>
+              <div class="comment-body">{{ comentario.conteudo|linebreaks }}</div>
             </article>
           {% empty %}
-            <p class="muted-copy">Nenhum comentario aprovado.</p>
+            <p class="muted-copy">Ainda não há comentários.</p>
           {% endfor %}
 
-          <form method="post" class="comment-form">
+          <form method="post" class="comment-form stack-form">
             {% csrf_token %}
-            <h3>Deixe um comentario</h3>
-            {{ formulario_comentario.as_p }}
-            <button type="submit" class="primary-button">Enviar comentario</button>
+            <h3>Deixe um comentário</h3>
+            {{ formulario_comentario.non_field_errors }}
+            {% for campo in formulario_comentario %}
+              {% if campo.name == 'website' %}
+                <div class="form-field campo-extra" aria-hidden="true">{{ campo.as_field_group }}</div>
+              {% else %}
+                <div class="form-field">{{ campo.as_field_group }}</div>
+              {% endif %}
+            {% endfor %}
+            <button type="submit" class="primary-button">Enviar comentário</button>
+            <p class="form-note">Os comentários aparecem depois de aprovados.</p>
           </form>
         </aside>
       </main>
-    </div>
-  </body>
-</html>
+{% endblock %}

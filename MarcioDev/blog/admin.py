@@ -1,6 +1,10 @@
 from django.contrib import admin
 
+from .forms import AdminLoginForm
 from .models import Comentario, Post, Tag
+
+# O login do admin usa o mesmo limite de tentativas que /accounts/login/.
+admin.site.login_form = AdminLoginForm
 
 
 @admin.register(Tag)
@@ -23,3 +27,9 @@ class ComentarioAdmin(admin.ModelAdmin):
     list_display = ('nome', 'post', 'aprovado', 'criado_em')
     list_filter = ('aprovado', 'criado_em')
     search_fields = ('nome', 'email', 'conteudo')
+    actions = ['aprovar_comentarios']
+
+    @admin.action(description='Aprovar comentários selecionados')
+    def aprovar_comentarios(self, request, queryset):
+        total = queryset.update(aprovado=True)
+        self.message_user(request, f'{total} comentário(s) aprovado(s).')

@@ -10,24 +10,90 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import sys
 from pathlib import Path
+
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+def _carregar_env_local(caminho):
+    """Lê variáveis de um ficheiro .env local (fora do git), sem sobrepor as já definidas."""
+    if not caminho.is_file():
+        return
+    for linha in caminho.read_text(encoding='utf-8').splitlines():
+        linha = linha.strip()
+        if not linha or linha.startswith('#') or '=' not in linha:
+            continue
+        chave, valor = linha.split('=', 1)
+        os.environ.setdefault(chave.strip(), valor.strip().strip('\'"'))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-so-para-desenvolvimento')
+
+# Em desenvolvimento, MarcioDev/.env define DEBUG=True. Em produção o ficheiro não
+# existe e as variáveis vêm do painel do alojamento.
+_carregar_env_local(BASE_DIR / '.env')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+# 'manage.py test' corre com definições de desenvolvimento (chave local, sem manifest).
+TESTING = sys.argv[1:2] == ['test']
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('SECRET_KEY', '')
+if DEBUG or TESTING:
+    # Chave só para desenvolvimento local e testes; nunca chega a produção.
+    SECRET_KEY = SECRET_KEY or 'django-insecure-apenas-para-desenvolvimento-local'
+elif not SECRET_KEY or SECRET_KEY.startswith('django-insecure-'):
+    # As chaves 'django-insecure-...' estiveram no repositório público: não servem.
+    raise ImproperlyConfigured(
+        'Define a variável de ambiente SECRET_KEY com um valor longo e aleatório '
+        '(no Render: Environment > Add Environment Variable > Generate). '
+        'Para desenvolvimento local, copia .env.example para .env.'
+    )
+
+
+# Domínio público do site: usado nos URLs canónicos, no sitemap e no robots.txt.
+# No Render vem de RENDER_EXTERNAL_HOSTNAME; com domínio próprio, define SITE_HOST.
+SITE_HOST = (
+    os.environ.get('SITE_HOST')
+    or os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+    or 'my-personal-website-3-5ggz.onrender.com'
+)
+SITE_URL = f'https://{SITE_HOST}'
+SITE_NAME = 'Leomar'
+
 ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+if not SITE_HOST.endswith('.onrender.com'):
+    ALLOWED_HOSTS.append(SITE_HOST)
+
+# Só as origens do próprio site são de confiança (antes: qualquer *.onrender.com).
+CSRF_TRUSTED_ORIGINS = sorted({
+    f'https://{host}'
+    for host in (SITE_HOST, os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
+    if host
+})
+
+if not DEBUG:
+    # O Render termina o HTTPS no proxy e indica o protocolo original neste cabeçalho.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # HSTS: o browser passa a usar sempre HTTPS neste domínio e nos subdomínios.
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', 60 * 60 * 24 * 365))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # O Render já redirecciona HTTP para HTTPS antes de chegar ao Django. Activar
+    # isto só noutro alojamento que não o faça (com o cabeçalho acima a funcionar).
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+
+SILENCED_SYSTEM_CHECKS = [
+    'security.W008',  # SECURE_SSL_REDIRECT: o redireccionamento é feito pelo proxy do Render.
+    'security.W021',  # HSTS preload: exige registar o domínio em hstspreload.org; fica de fora.
+]
 
 
 # Application definition
@@ -66,6 +132,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog.context_processors.site',
             ],
         },
     },
@@ -77,6 +144,8 @@ WSGI_APPLICATION = 'MarcioDev.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Sem DATABASE_URL usa-se SQLite, que só serve para desenvolvimento: no Render o
+# disco é apagado a cada deploy e sempre que o serviço adormece.
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -102,14 +171,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+if TESTING:
+    # Hash rápido só nos testes; em produção mantém-se o PBKDF2 do Django.
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+
+LOGIN_REDIRECT_URL = '/posts/'
+LOGOUT_REDIRECT_URL = '/posts/'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'pt-br'
-
-LOGIN_REDIRECT_URL = '/posts/'
-LOGOUT_REDIRECT_URL = '/posts/'
 
 TIME_ZONE = 'UTC'
 
@@ -124,9 +197,17 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Em produção o WhiteNoise serve ficheiros comprimidos e com hash no nome (gerados
+# pelo collectstatic). Em desenvolvimento e nos testes não é preciso collectstatic.
 STORAGES = {
     'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
-    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+    'staticfiles': {
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
+            if DEBUG or TESTING
+            else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
 }
 
 # Default primary key field type

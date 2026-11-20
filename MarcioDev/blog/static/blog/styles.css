@@ -1,11 +1,9 @@
 :root {
   --bg: #f6f1ea;
-  --panel: #f2eee9;
   --line: #d9d0c6;
   --text: #171512;
   --muted: #5a5149;
-  --accent: #8d6a4a;
-  --accent-soft: #efe3d6;
+  --error: #9b1c1c;
   --white: #ffffff;
 }
 
@@ -21,9 +19,15 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Segoe UI", sans-serif;
+  /* Segoe UI só existe no Windows; os restantes sistemas usam a sua fonte de interface. */
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
   letter-spacing: -0.02em;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
 }
 
 img {
@@ -37,7 +41,10 @@ a {
 }
 
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 3px;
 }
@@ -240,7 +247,6 @@ button:focus-visible {
 
 .project-stack {
   margin: 0 0 0.9rem;
-  color: var(--accent);
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -478,17 +484,22 @@ button:focus-visible {
   color: var(--muted);
 }
 
+.comment-body p + p {
+  margin-top: 0.6rem;
+}
+
 .comment-form {
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line);
 }
 
-.comment-form p {
+/* Formulários: comentários, login e criação de posts. */
+.form-field {
   margin: 0 0 1rem;
 }
 
-.comment-form label {
+.stack-form label {
   display: block;
   margin-bottom: 0.4rem;
   font-size: 0.82rem;
@@ -497,8 +508,9 @@ button:focus-visible {
   text-transform: uppercase;
 }
 
-.comment-form input,
-.comment-form textarea {
+.stack-form input,
+.stack-form textarea,
+.stack-form select {
   width: 100%;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.2);
@@ -507,13 +519,95 @@ button:focus-visible {
   font: inherit;
 }
 
-.comment-form textarea {
+.stack-form input[type="checkbox"] {
+  width: auto;
+}
+
+.stack-form textarea {
   min-height: 120px;
   resize: vertical;
 }
 
-.comment-form button {
+.stack-form button {
   margin-top: 0.5rem;
+}
+
+.stack-form .helptext,
+.form-note {
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.form-note {
+  margin: 1rem 0 0;
+}
+
+.errorlist {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  color: var(--error);
+  font-size: 0.88rem;
+}
+
+/* Campo-armadilha contra spam: fora do ecrã para pessoas, visível para robôs. */
+.campo-extra {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form-layout {
+  padding-top: 48px;
+}
+
+.form-card {
+  max-width: 760px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1.8rem;
+}
+
+.form-card-narrow {
+  max-width: 440px;
+}
+
+.form-card h1 {
+  margin: 0.5rem 0 1.5rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 0.5rem;
+}
+
+.form-actions button {
+  margin-top: 0;
+}
+
+/* Avisos (ex.: "comentário enviado"). */
+.messages {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.message {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--text);
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.8rem 1rem;
 }
 
 @media (max-width: 860px) {

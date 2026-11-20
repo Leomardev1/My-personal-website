@@ -60,6 +60,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+# Ficheiros estaticos gerados pelo collectstatic (o Render volta a cria-los em cada deploy)
+staticfiles/
 
 # Flask stuff:
 instance/

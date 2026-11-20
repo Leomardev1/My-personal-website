@@ -1,16 +1,24 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-    <meta charset="utf-8">
-    <title>Criar post</title>
-</head>
-<body>
-    <h1>Criar post</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ formulario.as_p }}
-        <button type="submit">Salvar post</button>
-    </form>
-    <p><a href="{% url 'blog:post_lista' %}">Cancelar</a></p>
-</body>
-</html>
+{% extends "blog/base.html" %}
+
+{% block shell_class %} blog-shell{% endblock %}
+
+{% block content %}
+      <main class="form-layout">
+        <section class="form-card">
+          <p class="section-kicker">Blog</p>
+          <h1>Criar post</h1>
+
+          <form method="post" class="stack-form">
+            {% csrf_token %}
+            {{ formulario.non_field_errors }}
+            {% for campo in formulario %}
+              <div class="form-field">{{ campo.as_field_group }}</div>
+            {% endfor %}
+            <div class="form-actions">
+              <button type="submit" class="primary-button">Salvar post</button>
+              <a href="{% url 'blog:post_lista' %}" class="text-button">Cancelar</a>
+            </div>
+          </form>
+        </section>
+      </main>
+{% endblock %}

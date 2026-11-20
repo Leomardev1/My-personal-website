@@ -1,7 +1,20 @@
+# Blueprint do Render.
+# Atenção: o serviço que está em produção foi criado à mão no painel do Render,
+# por isso este ficheiro só tem efeito se criares um serviço novo a partir dele.
+# Nesse caso o endereço do site muda e é preciso definir as mesmas variáveis.
 services:
   - type: web
     name: marciodev
     runtime: python
+    plan: free
     rootDir: MarcioDev
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
     startCommand: gunicorn MarcioDev.wsgi:application
+    envVars:
+      # Chave secreta do Django: o Render gera um valor aleatório.
+      - key: SECRET_KEY
+        generateValue: true
+      # Ligação ao PostgreSQL: o valor é pedido no painel (não fica no git).
+      # Sem ela o site usa SQLite e perde os dados a cada deploy ou adormecimento.
+      - key: DATABASE_URL
+        sync: false

@@ -1,10 +1,15 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
+
+# Limite de caracteres de um comentário (validado no formulário).
+TAMANHO_MAXIMO_COMENTARIO = 2000
 
 
 def gerar_slug_unico(instancia, valor):
     # Converte o nome ou titulo em um texto adequado para usar na URL.
-    slug_base = slugify(valor)
+    # Titulos so com simbolos ou emojis nao geram slug: usa-se o nome do modelo.
+    slug_base = slugify(valor) or instancia._meta.model_name
     slug = slug_base
     contador = 2
     modelo = instancia.__class__
@@ -37,15 +42,16 @@ class Tag(models.Model):
 
 
 class Post(models.Model):
-    titulo = models.CharField(max_length=200)
+    titulo = models.CharField('título', max_length=200)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     resumo = models.TextField(blank=True)
-    conteudo = models.TextField()
+    conteudo = models.TextField('conteúdo')
     # Um post pode ter varias tags, e uma tag pode estar em varios posts.
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
+    # Desmarcado, o post fica como rascunho: nao aparece no blog nem no sitemap.
     publicado = models.BooleanField(default=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
-    atualizado_em = models.DateTimeField(auto_now=True)
+    criado_em = models.DateTimeField('criado em', auto_now_add=True)
+    atualizado_em = models.DateTimeField('atualizado em', auto_now=True)
 
     class Meta:
         ordering = ['-criado_em']
@@ -58,6 +64,10 @@ class Post(models.Model):
             self.slug = gerar_slug_unico(self, self.titulo)
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        # Usado pelo sitemap e pelo botao "Ver no site" do admin.
+        return reverse('blog:post_detalhe', kwargs={'slug': self.slug})
+
     def __str__(self):
         return self.titulo
 
@@ -66,16 +76,16 @@ class Comentario(models.Model):
     # Ao excluir um post, seus comentarios tambem sao excluidos.
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comentarios')
     nome = models.CharField(max_length=100)
-    email = models.EmailField()
-    conteudo = models.TextField()
-    # Comentarios novos sao exibidos imediatamente no blog.
-    aprovado = models.BooleanField(default=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField('e-mail')
+    conteudo = models.TextField('comentário', max_length=TAMANHO_MAXIMO_COMENTARIO)
+    # Comentarios novos so aparecem no blog depois de aprovados no admin.
+    aprovado = models.BooleanField(default=False)
+    criado_em = models.DateTimeField('criado em', auto_now_add=True)
 
     class Meta:
         ordering = ['criado_em']
-        verbose_name = 'comentario'
-        verbose_name_plural = 'comentarios'
+        verbose_name = 'comentário'
+        verbose_name_plural = 'comentários'
 
     def __str__(self):
-        return f'Comentario de {self.nome} em {self.post}'
+        return f'Comentário de {self.nome} em {self.post}'

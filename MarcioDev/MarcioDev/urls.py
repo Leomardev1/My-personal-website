@@ -14,13 +14,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.sitemaps.views import sitemap
 from django.http import HttpResponse
 from django.urls import include, path
 from django.views.generic import TemplateView
 
 from blog import views as blog_views
+from blog.forms import LoginForm
 from .sitemaps import PostSitemap, StaticViewSitemap
 
 sitemaps = {"static": StaticViewSitemap, "posts": PostSitemap}
@@ -34,11 +37,20 @@ def google_verification(request):
 urlpatterns = [
     path('', blog_views.portfolio, name='portfolio'),
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
+    # Só login e logout: a recuperação de senha por e-mail não está configurada.
+    path('accounts/login/', LoginView.as_view(
+        authentication_form=LoginForm,
+        extra_context={
+            'pagina_titulo': f'Login | {settings.SITE_NAME}',
+            'pagina_noindex': True,
+        },
+    ), name='login'),
+    path('accounts/logout/', LogoutView.as_view(), name='logout'),
     path('posts/', include('blog.urls')),
     path("google8226808ef9ac6c65.html", google_verification),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps},
          name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", TemplateView.as_view(
-        template_name="robots.txt", content_type="text/plain"))
+        template_name="robots.txt", content_type="text/plain")),
+    path("favicon.ico", blog_views.favicon),
 ]

@@ -1,0 +1,59 @@
+{% load static seo %}
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ pagina_titulo|default:SITE_NAME }}</title>
+    {% if pagina_descricao %}
+      <meta name="description" content="{{ pagina_descricao }}">
+    {% endif %}
+    {% if pagina_noindex %}
+      <meta name="robots" content="noindex">
+    {% else %}
+      {% with url=pagina_canonical|default:URL_CANONICA %}
+        <link rel="canonical" href="{{ url }}">
+        <meta property="og:url" content="{{ url }}">
+      {% endwith %}
+      <meta property="og:site_name" content="{{ SITE_NAME }}">
+      <meta property="og:locale" content="pt_BR">
+      <meta property="og:type" content="{{ pagina_tipo|default:'website' }}">
+      <meta property="og:title" content="{{ pagina_titulo|default:SITE_NAME }}">
+      {% if pagina_descricao %}
+        <meta property="og:description" content="{{ pagina_descricao }}">
+      {% endif %}
+      <meta name="twitter:card" content="summary">
+    {% endif %}
+    <link rel="icon" href="{% static 'blog/favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'blog/styles.css' %}">
+    {% if dados_estruturados %}{% jsonld dados_estruturados %}{% endif %}
+  </head>
+  <body>
+    <div class="page-shell{% block shell_class %}{% endblock %}">
+      <header class="site-header">
+        <a class="brand" href="{% url 'portfolio' %}" aria-label="Leomar, página inicial">Leomar</a>
+
+        <nav class="site-nav" aria-label="Navegação principal">
+          <a href="{% url 'portfolio' %}#about">Sobre</a>
+          <a href="{% url 'portfolio' %}#projects">Projetos</a>
+          <a href="{% url 'portfolio' %}#skills">Skills</a>
+          <a href="{% url 'portfolio' %}#learning">Aprendizado</a>
+          <a href="{% url 'portfolio' %}#contact">Contato</a>
+          <a href="{% url 'blog:post_lista' %}">Blog</a>
+        </nav>
+
+        <a class="header-button" href="{% url 'portfolio' %}#contact">Contato</a>
+      </header>
+
+      {% if messages %}
+        <ul class="messages" role="status">
+          {% for message in messages %}
+            <li class="message message-{{ message.level_tag }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>
